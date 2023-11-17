@@ -1,0 +1,166 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <style>
+        #map { height: 500px; }
+        body{
+            background-color:  #f2f2f2;
+        }
+        h1{
+            text-align: center;
+        }
+        h3{
+            margin-left: 2%;
+        }
+        .map{
+            margin-top: 2%;
+            margin-left: 5%;
+            width: 90%;
+            height: 600px;
+        }
+        .form{
+            margin-top: 2%;
+            margin-left: 10%;
+
+        }
+       .result-area{
+            margin-top: 2%;
+            margin-left: 10%;
+            display: flex;
+            gap: 20px 2%;
+            flex-wrap: wrap;
+            
+       }
+       /* width: 450px;
+       float: left; */
+        .list-box{
+            width: 30%;
+        }
+        ul {
+            list-style: none;
+        }
+        .sel{
+            width: 200px; 
+            border: 1px solid #C4C4C4;
+            box-sizing: border-box;
+            border-radius: 10px;
+            padding: 12px 13px;
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 16px;
+            margin-left: 3%;
+        }
+    </style>
+
+    <title>서울 문화행사 현황</title>
+</head>
+<body>
+    <h1>서울 문화행사 현황</h1>
+
+    <div class="map" id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    
+    <script>
+        // 서울시 중심 좌표
+        const seoulCenter = [37.5665, 126.9780];
+
+        let events;
+        // Leaflet 맵 초기화
+        const map = L.map('map').setView(seoulCenter, 25);
+
+        var value;
+
+        // 지도 타일 레이어 추가
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // 서버에서 문화행사 정보를 가져와서 마커로 표시
+        fetch('/eventsScript')
+            .then(response => response.json())
+            .then(districts => {
+                events = districts
+            console.log(events)
+            });
+        
+        // 클릭한 마커의 행사 정보를 표시하는 함수
+        function showEventDetails(eventId) {
+            // 화면을 최상위로 이동 
+            window.scrollTo(0, 0);
+
+            const selectedEvent = events.find(event => event.TITLE == eventId);
+            console.log(`선택한 행사: ${selectedEvent.TITLE}`);
+
+            map.setView(selectedEvent.location, 25);
+
+            L.marker(selectedEvent.location)
+            .addTo(map)
+            .bindPopup("공연 제목 : " + selectedEvent.TITLE + " | 기간 : " + selectedEvent.DATE);
+
+            // 또는 다른 방식으로 정보를 표시할 수 있습니다.
+        }
+    </script>
+    
+    <div>
+        <br>
+        <form class="form" action="/events" method="get">
+            <select class="sel" name="data", id="data" onchange="this.form.submit()">
+                <option value="none">=== 자치구 선택 ===</option>
+                <option value="강남구">강남구</option>
+                <option value="강동구">강동구</option>
+                <option value="강북구">강북구</option>
+                <option value="강서구">강서구</option>
+                <option value="관악구">관악구</option>
+                <option value="광진구">광진구</option>
+                <option value="구로구">구로구</option>
+                <option value="금천구">금천구</option>
+                <option value="노원구">노원구</option>
+                <option value="도봉구">도봉구</option>
+                <option value="동대문구">동대문구</option>
+                <option value="동작구">동작구</option>
+                <option value="마포구">마포구</option>
+                <option value="서대문구">서대문구</option>
+                <option value="서초구">서초구</option>
+                <option value="성동구">성동구</option>
+                <option value="성북구">성북구</option>
+                <option value="송파구">송파구</option>
+                <option value="양천구">양천구</option>
+                <option value="영등포구">영등포구</option>
+                <option value="용산구">용산구</option>
+                <option value="은평구">은평구</option>
+                <option value="종로구">종로구</option>
+                <option value="중구">중구</option>
+                <option value="중랑구">중랑구</option>
+            </select>
+        </form>
+    </div>
+
+    <div class="result-area">
+        <!-- div 태그 안에서 Python 변수를 출력 -->
+        {% for event in events %}
+            <div class="list-box" onclick="showEventDetails('{{event.TITLE}}')">
+                <ul>
+                    <li>
+                        <img src = '{{ event.MAIN_IMG }}', style="width: 350px; height: 350px; border-radius: 10px;">
+                        <div style="margin-top: 1%;">
+                            <strong>{{ event.TITLE }}</strong>
+                            <div>{{ event.CODENAME }}</div> 
+                            <div>{{ event.DATE }}</div>
+                            <div>{{ event.GUNAME }} {{ event.PLACE }}</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
