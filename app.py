@@ -10,7 +10,7 @@ app = Flask(__name__)
 # 서울시 문화행사 정보 API 엔드포인트
 API_URL = "http://openapi.seoul.go.kr:8088/"
 API_ENDPOINT = "/json/culturalEventInfo/1/100"
-API_KEY = "7946634a496c616e3836574f675945"
+API_KEY = "Insert Your API KEY"
 
 @app.route('/')
 def index():
